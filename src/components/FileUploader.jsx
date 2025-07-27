@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { uploadFile } from "../services/api";
 
 const FileUploader = () => {
@@ -6,6 +7,7 @@ const FileUploader = () => {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const inputRef = useRef();
+  const navigate = useNavigate();
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -27,8 +29,9 @@ const FileUploader = () => {
     }
     setUploading(true);
     try {
-      await uploadFile(file);
-      // Rediriger ou afficher un message de succès
+      const result = await uploadFile(file);
+      // Rediriger vers la page d'analyse après upload réussi
+      navigate('/analysis', { state: { fileData: result } });
     } catch (err) {
       setError("Erreur lors de l'upload.");
     } finally {
