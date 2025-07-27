@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { uploadFile } from "../services/api";
+import { useNotification } from "../context/NotificationContext";
 
 const FileUploader = () => {
   const [file, setFile] = useState(null);
@@ -8,6 +9,7 @@ const FileUploader = () => {
   const [error, setError] = useState("");
   const inputRef = useRef();
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -25,6 +27,7 @@ const FileUploader = () => {
   const handleUpload = async () => {
     if (!file) {
       setError("Veuillez sélectionner un fichier.");
+      showNotification("Veuillez sélectionner un fichier.", "error");
       return;
     }
     setUploading(true);
@@ -32,8 +35,10 @@ const FileUploader = () => {
       const result = await uploadFile(file);
       // Rediriger vers la page d'analyse après upload réussi
       navigate('/analysis', { state: { fileData: result } });
+      showNotification("Fichier uploadé avec succès !", "success");
     } catch (err) {
       setError("Erreur lors de l'upload.");
+      showNotification("Erreur lors de l'upload.", "error");
     } finally {
       setUploading(false);
     }

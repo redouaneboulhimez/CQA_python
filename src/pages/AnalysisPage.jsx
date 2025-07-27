@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getAnalysisResults } from "../services/api";
+import { useNotification } from "../context/NotificationContext";
 
 const AnalysisPage = () => {
   const [analysisData, setAnalysisData] = useState(null);
@@ -8,6 +9,7 @@ const AnalysisPage = () => {
   const [error, setError] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     const fetchAnalysis = async () => {
@@ -22,13 +24,14 @@ const AnalysisPage = () => {
         }
       } catch (err) {
         setError("Erreur lors du chargement des analyses");
+        showNotification("Erreur lors du chargement des analyses", "error");
       } finally {
         setLoading(false);
       }
     };
 
     fetchAnalysis();
-  }, [location.state]);
+  }, [location.state, showNotification]);
 
   if (loading) {
     return (

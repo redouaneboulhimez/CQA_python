@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { generateReport } from "../services/api";
+import { useNotification } from "../context/NotificationContext";
 
 const ReportPage = () => {
   const [reportData, setReportData] = useState(null);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
 
   const handleGenerateReport = async () => {
     setGenerating(true);
@@ -46,8 +48,10 @@ const ReportPage = () => {
       };
       
       setReportData(mockReport);
+      showNotification("Rapport généré avec succès !", "success");
     } catch (err) {
       setError("Erreur lors de la génération du rapport");
+      showNotification("Erreur lors de la génération du rapport", "error");
     } finally {
       setGenerating(false);
     }
