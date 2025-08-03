@@ -1,90 +1,78 @@
-import React, { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { uploadFile } from "../services/api";
-import { useNotification } from "../context/NotificationContext";
+import React, { useState, useRef } from "react";
 
 const FileUploader = () => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState("");
-  const inputRef = useRef();
-  const navigate = useNavigate();
-  const { showNotification } = useNotification();
+  const fileInputRef = useRef(null);
+
+  const handleFileSelect = (e) => {
+    setFile(e.target.files[0]);
+  };
 
   const handleDrop = (e) => {
     e.preventDefault();
-    setError("");
     const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile) setFile(droppedFile);
-  };
-
-  const handleChange = (e) => {
-    setError("");
-    const selectedFile = e.target.files[0];
-    if (selectedFile) setFile(selectedFile);
-  };
-
-  const handleUpload = async () => {
-    if (!file) {
-      setError("Veuillez sélectionner un fichier.");
-      showNotification("Veuillez sélectionner un fichier.", "error");
-      return;
+    if (droppedFile) {
+      setFile(droppedFile);
     }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleUpload = () => {
+    if (!file) return;
     setUploading(true);
-    try {
-      const result = await uploadFile(file);
-      navigate("/analysis", { state: { fileData: result } });
-      showNotification("Fichier uploadé avec succès !", "success");
-    } catch (err) {
-      setError("Erreur lors de l'upload.");
-      showNotification("Erreur lors de l'upload.", "error");
-    } finally {
+    // Simuler un upload
+    setTimeout(() => {
+      alert(`Fichier ${file.name} uploadé avec succès ✅`);
       setUploading(false);
-    }
+      setFile(null);
+    }, 2000);
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current.click();
   };
 
   return (
     <div className="flex flex-col items-center">
-      {/* Zone de dépôt avec plus de padding et d'espacement */}
+      {/* Zone de dépôt */}
       <div
-        className="w-80 border-2 border-dashed border-gray-300 hover:border-blue-400 transition p-8 rounded-xl text-center cursor-pointer mb-20"
+        className="w-80 border-2 border-dashed border-gray-300 hover:border-blue-400 transition p-8 rounded-xl text-center cursor-pointer mb-4 bg-gray-50"
+        onClick={triggerFileInput}
         onDrop={handleDrop}
-        onDragOver={(e) => e.preventDefault()}
-        onClick={() => inputRef.current.click()}
+        onDragOver={handleDragOver}
       >
         <input
           type="file"
-          ref={inputRef}
-          className="hidden"
-          onChange={handleChange}
+          ref={fileInputRef}
+          onChange={handleFileSelect}
           accept=".js,.py,.java,.cpp,.ts,.tsx,.jsx,.c,.cs,.rb,.go,.php,.html,.css"
+          className="hidden"
         />
         <p className="text-gray-600">
-          Glissez-déposez un fichier ici ou{" "}
-          <span className="text-blue-600 underline hover:text-blue-800">
-            cliquez pour sélectionner
-          </span>
+          {file ? (
+            <span className="text-green-600 font-semibold">{file.name}</span>
+          ) : (
+            <>
+              Glissez-déposez un fichier ici ou{" "}
+              <span className="text-blue-600 underline hover:text-blue-800">
+                cliquez pour sélectionner
+              </span>
+            </>
+          )}
         </p>
-
-        {file && (
-          <div className="mt-3 text-green-600 font-medium">
-            Fichier sélectionné : {file.name}
-          </div>
-        )}
-        {error && (
-          <div className="mt-3 text-red-500 font-medium">
-            {error}
-          </div>
-        )}
       </div>
 
-      {/* Bouton séparé sous la zone */}
+      {/* Bouton upload */}
       <button
-        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 disabled:opacity-50"
+        className="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 disabled:opacity-50"
         onClick={handleUpload}
-        disabled={uploading}
+        disabled={!file || uploading}
       >
-        {uploading ? "Upload en cours..." : "Uploader"}
+        {uploading ? "⏳ Upload en cours..." : "📤 Uploader"}
       </button>
     </div>
   );
